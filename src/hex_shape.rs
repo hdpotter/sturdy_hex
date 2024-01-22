@@ -64,14 +64,25 @@ impl HexShape {
 //     }
 // }
 
-impl<'a> IntoIterator for &'a HexShape {
+impl IntoIterator for HexShape {
     type Item = HexCoord;
-    type IntoIter = echoes_utility::CopyVecIterator<'a, Self::Item>;
+    type IntoIter = std::vec::IntoIter<HexCoord>;
+   
 
     fn into_iter(self) -> Self::IntoIter {
-        echoes_utility::CopyVecIterator::<Self::Item>::new(&self.hexes)
+        self.hexes.into_iter()
     }
 }
+
+impl<'a> IntoIterator for &'a HexShape {
+    type Item = &'a HexCoord;
+    type IntoIter = std::slice::Iter<'a, HexCoord>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.hexes.iter()
+    }
+}
+
 
 
 
@@ -130,16 +141,17 @@ impl<'a> HexShapeView<'a> {
     }
 }
 
+// no consuming iterator because we can't consume from a reference
 
-impl<'a> IntoIterator for &HexShapeView<'a> {
-    type Item = HexCoord;
-    type IntoIter = echoes_utility::CopyVecIterator<'a, Self::Item>;
+impl<'a, 'b> IntoIterator for &'b HexShapeView<'a> {
+    type Item = &'b HexCoord;
+    // type IntoIter = std::vec::IntoIter<&'a HexCoord>;
+    type IntoIter = std::slice::Iter<'b, HexCoord>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.shape.into_iter()
     }
 }
-
 
 
 // impl ops::Index<usize> for HexShapeView<'_> {

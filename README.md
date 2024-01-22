@@ -3,7 +3,7 @@ Yet another hex library for Rust!  I've made it available in an early state with
 ## Coordinates and Basic Usage
 SturdyHex uses the axial coordinate system (and several of the algorithms) from Amit Patel's [excellent resource](https://www.redblobgames.com/grids/hexagons/) on hex grids.  The `hex_field` struct relates a worldspace coordinate system with a hex coordinate system:
 ```rust
-let  hex_field  =  HexField::new(
+let hex_field = HexField::new(
 	Vector3::<f32>::zero(), //center of hex (0, 0, 0)
 	Vector3::<f32>::new(0.0, 0.0, 1.0), //up direction
 	Vector3::<f32>::new(0.0, 1.0, 0.0), //center of hex with coord (0, 1, -1)

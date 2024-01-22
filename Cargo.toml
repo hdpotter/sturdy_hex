@@ -7,4 +7,3 @@ edition = "2021"
 
 [dependencies]
 cgmath = "0.18.0"
-echoes_utility = { path = "../echoes_utility" }

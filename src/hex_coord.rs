@@ -1,6 +1,7 @@
 use std::ops;
 use crate::{*, hex_range_iterator::{HexVertexIterator, HexHalfEdgeIterator}};
 
+/// A coordinate specifying a hex on a hex grid.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct HexCoord {
     q: i32,
@@ -9,19 +10,24 @@ pub struct HexCoord {
 
 impl HexCoord {
     // accessors
+    /// Returns the *q* coordinate of the hex in the cubical coordinate system described [here](https://www.redblobgames.com/grids/hexagons/).
     pub fn q(&self) -> i32 {
         self.q
     }
 
+    /// Returns the *r* coordinate of the hex in the cubical coordinate system described [here](https://www.redblobgames.com/grids/hexagons/).
     pub fn r(&self) -> i32 {
         self.r
     }
 
+    /// Returns the *s* coordinate of the hex in the cubical coordinate system described [here](https://www.redblobgames.com/grids/hexagons/).
     pub fn s(&self) -> i32 {
         -(self.q + self.r)
     }
 
     // constructor
+    /// Creates a `HexCoord` with the given *q* and *r* coordinates, as described [here](https://www.redblobgames.com/grids/hexagons/).
+    /// It is not necessary to specify an *s* coordinate, because SturdyHex enforces that *q*, *r*, and *s* sum to zero.
     pub fn new(q: i32, r: i32) -> HexCoord {
         HexCoord {
             q,
@@ -30,9 +36,13 @@ impl HexCoord {
     }
 
     // constants
+    /// A hex coordinate representing the origin of the hex coordinate system.
     pub const ZERO: HexCoord = HexCoord{q: 0, r: 0};
 
     // methods
+    /// Returns a hex coordinate representing one of the six unit directions from a hex to its neighbors.
+    /// Parameter `i` specifies which neighbor.
+    /// For convenience, `i` is wrapped (not clamped) to the range [0, 5].
     pub fn get_unit_coord(i: i32) -> HexCoord {
         match i.rem_euclid(6) {
             0 => HexCoord::new(0, -1),
@@ -45,14 +55,19 @@ impl HexCoord {
         }
     }
 
+    /// Returns the `i`th vertex of `self`.
+    /// For convenience, `i` is wrapped (not clamped) to the range [0, 5].
     pub fn get_vertex(&self, i: i32) -> HexVertex {
         HexVertex::get_unit_coord(i).translate(self)
     }
 
+    /// Returns an iterator over the vertices of `self`.
     pub fn vertices(&self) -> HexVertexIterator {
         HexVertexIterator::new(*self)
     }
 
+    /// Returns the `i`th half-edge of `self`.
+    /// For convenience, `i` is wrapped (not clamped) to the range [0, 5].
     pub fn get_half_edge(&self, i: i32) -> HexHalfEdge {
         HexHalfEdge::new(
             self.get_vertex(i),
@@ -60,10 +75,12 @@ impl HexCoord {
         )
     }
 
+    /// Returns an iterator over the half-edges of `self`.
     pub fn edges(&self) -> HexHalfEdgeIterator {
         HexHalfEdgeIterator::new(*self)
     }
 
+    /// Returns a hex coordinate representing `self` rotated a sixth-turn CCW around the hex grid origin.
     pub fn rotate_back(&self) -> HexCoord {
         HexCoord {
             q: -self.s(),
@@ -71,6 +88,7 @@ impl HexCoord {
         }
     }
 
+    /// Returns a hex coordinate representing `self` rotated a sixth-turn CW around the hex grid origin.
     pub fn rotate_forward(&self) -> HexCoord {
         HexCoord {
             q: -self.r(),
@@ -78,6 +96,7 @@ impl HexCoord {
         }
     }
 
+    /// Returns a hex coordinate representing `self` rotated `i` sixth-turns CCW around `pivot`.
     pub fn rotate_around(&self, pivot: HexCoord, rotation: i32) -> HexCoord {
         let relative = *self - pivot;
         
@@ -95,6 +114,8 @@ impl HexCoord {
         pivot + relative
     }
 
+    /// Returns the number of hexes in the shortest path along the hex grid from `a` to `b`.
+    /// Includes `b` in the count but not `a`; if `a` and `b` are neighbors, `hex_distance(a, b)` returns 1.
     pub fn hex_distance(a: HexCoord, b: HexCoord) -> i32 {
         ((a.q() - b.q()).abs() + (a.r() - b.r()).abs() + (a.s() - b.s()).abs()) / 2
     }

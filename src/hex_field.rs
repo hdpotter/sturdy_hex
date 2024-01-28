@@ -2,16 +2,24 @@ use crate::*;
 use cgmath::Vector3;
 use cgmath::InnerSpace;
 
-pub enum HexOrientation {
-    FlatTop,
-    PointyTop,
-}
+// pub enum HexOrientation {
+//     FlatTop,
+//     PointyTop,
+// }
 
-pub enum Handedness {
-    LeftHanded,
-    RightHanded,
-}
+// pub enum Handedness {
+//     LeftHanded,
+//     RightHanded,
+// }
 
+/// A mapping between worldspace and hex coordinates. 
+/// Contains methods to determine which hex contains a worldspace point and calculate the worldspace positions of hex cells and vertices.
+/// 
+/// SturdyHex allows you to set up a `HexField` at any position, orientation, and scale factor.
+/// For example, you can create a `HexField` with a center hex offset to worldspace coordinate *(100, 100, 0)* to place the lower-left corner at the worldspace origin.
+/// Likewise, you can create a `HexField` rotated and positioned to be on an overhead display rectangle in worldspace.
+/// 
+/// When querying which hex contains a worldspace point, `HexField` projects the query point onto the plane of the hex grid.
 pub struct HexField {
     origin: Vector3<f32>,
     
@@ -28,19 +36,33 @@ pub struct HexField {
 }
 
 impl HexField {
+    /// You can conceptualize a `HexField` as a plane with a hex grid on it, positioned and oriented somewhere in worldspace.
+    /// This function returns the worldspace direction of this plane's x-axis.
     pub fn x_basis(&self) -> Vector3<f32> {
         self.x_basis
     }
 
+    /// You can conceptualize a `HexField` as a plane with a hex grid on it, positioned and oriented somewhere in worldspace.
+    /// This function returns the worldspace direction of this plane's x-axis.
     pub fn y_basis(&self) -> Vector3<f32> {
         self.y_basis
     }
 
+    /// You can conceptualize a `HexField` as a plane with a hex grid on it, positioned and oriented somewhere in worldspace.
+    /// This function returns the worldspace direction normal to this plane's surface.
     pub fn z_basis(&self) -> Vector3<f32> {
         self.z_basis
     }
 
-    pub fn new(origin: Vector3<f32>, z_direction: Vector3<f32>, pos_y_hex_displacement: Vector3<f32>) -> HexField {
+    /// Creates a `HexField` with the specified parameters.
+    /// * `origin`: The worldspace position of the center of hex *(0, 0, 0)*.
+    /// * `z_direction`: The worldspace direction of `up` on the hex grid, perpendicular to the plane of hexes
+    /// * `pos_y_hex_displacement`: The vector from `origin` to the center of hex *(0, 1, -1)*.  Hex *(0, 1, -1)* is adjacent to `origin`; you can control the scale and rotation (around `z_direction`) of the `HexField` via this parameter.
+    pub fn new(
+        origin: Vector3<f32>,
+        z_direction: Vector3<f32>,
+        pos_y_hex_displacement: Vector3<f32>
+    ) -> HexField {
         let z_relative = z_direction - origin;
         let y_basis = pos_y_hex_displacement.normalize();
 
@@ -106,10 +128,12 @@ impl HexField {
         }
     }
 
+    /// Projects an arbitrary vector to lie on the plane of the hex grid.  Returns a result in the local cartesian coordinates of the hex grid.
     pub fn project_onto_plane(&self, position: Vector3<f32>) -> Vector3<f32> {
         HexField::project_onto_basis(position - self.origin, self.x_basis, self.y_basis, self.z_basis)
     }
 
+    /// Returns the exact, fractional coordinates of a given worldspace vector projected onto the hex grid.
     pub fn get_hex_coord_fraction(&self, position: Vector3<f32>) -> HexCoordFraction {
         // calculate q and r coordinates that do not respect the q + r + s = 0 invariant
         let qr = HexField::project_onto_basis((position - self.origin) / self.outer_radius, self.q_basis, self.r_basis, self.z_basis);
@@ -128,22 +152,26 @@ impl HexField {
         )
     }
 
+    /// Returns the hex coordinates, rounded to the nearest hex, of a given worldspace vector projected onto the hex grid.
     pub fn get_hex_coord(&self, position: Vector3<f32>) -> HexCoord {
         self.get_hex_coord_fraction(position).round()
     }
 
+    /// Returns the worldspace coordinates of a hex coordinate.
     pub fn get_position<T: Into<HexCoordFraction>>(&self, coord: T) -> Vector3<f32> {
         let coord = coord.into();
         self.outer_radius * (coord.q() * self.q_basis + coord.r() * self.r_basis + coord.s() * self.s_basis)
     }
 
+    /// Returns the worldspace coordinates of a hex coordinate, translated to be at `height` above the plane of the hex grid.
     pub fn get_position_with_height<T: Into<HexCoordFraction>>(&self, coord: T, height: f32) -> Vector3<f32> {
         self.get_position(coord) + height * self.z_basis
     }
 
-    pub fn get_face_vertex_position(&self, face: HexCoord, scale: f32, height: f32, i: i32) -> Vector3<f32> {
-        let center = self.get_position_with_height(face, height);
-        let outer = self.get_position_with_height(face.get_vertex(i), height);
+    /// Returns the worldspace coordinates of the `i`th vertex of the hex at the given coordinates, translated to be at `height` above the plane of the hex grid.
+    pub fn get_hex_vertex_position(&self, hex: HexCoord, scale: f32, height: f32, i: i32) -> Vector3<f32> {
+        let center = self.get_position_with_height(hex, height);
+        let outer = self.get_position_with_height(hex.get_vertex(i), height);
         center + scale * (outer - center)
     }
 

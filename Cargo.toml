@@ -2,6 +2,10 @@
 name = "sturdy_hex"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "A hex grid library with features that include vector-to-hex, hex-to-vector, chunking, and DCEL-like traversal"
+repository = "https://github.com/hdpotter/sturdy_hex"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

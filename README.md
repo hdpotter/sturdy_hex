@@ -30,3 +30,6 @@ The `HexTransform` struct represents a translation and rotation in hex coordinat
 The `HexShape` class stores a list of hex coordinates and supports the `contains` operation.  You can create a `HexShapeView` that references a `HexShape` and encodes a transformation on it; this allows you to query against a shape without copying its data.
 ### Range Iteration
 You can create a `HexRangeIterator` instance with a center coordinate and radius to iterate over the corresponding hexagonal range of hexes.
+
+## License
+Licensed under either of [Apache License, Version 2.0](APACHE-LICENSE) or [MIT License](MIT-LICENSE) at your option.

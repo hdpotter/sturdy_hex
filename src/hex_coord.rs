@@ -1,8 +1,8 @@
 use std::ops;
-use crate::{*, hex_range_iterator::{HexVertexIterator, HexHalfEdgeIterator}};
+use crate::{*, hex_range_iterator::{HexVertexIterator, HexHalfEdgeIterator, HexNeighborIterator}};
 
 /// A coordinate specifying a hex on a hex grid.
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct HexCoord {
     q: i32,
     r: i32,
@@ -45,14 +45,22 @@ impl HexCoord {
     /// For convenience, `i` is wrapped (not clamped) to the range [0, 5].
     pub fn get_unit_coord(i: i32) -> HexCoord {
         match i.rem_euclid(6) {
-            0 => HexCoord::new(0, -1),
-            1 => HexCoord::new(0, 1),
-            2 => HexCoord::new(-1, 0),
-            3 => HexCoord::new(1, 0),
-            4 => HexCoord::new(-1, 1),
-            5 => HexCoord::new(1, -1),
+            0 => HexCoord::new(1, -1),
+            1 => HexCoord::new(1, 0),
+            2 => HexCoord::new(0, 1),
+            3 => HexCoord::new(-1, 1),
+            4 => HexCoord::new(-1, 0),
+            5 => HexCoord::new(0, -1),
             _ => panic!("logic error; rem_euclid(6) should return one of the previous cases"),
         }
+    }
+
+    pub fn get_neighbor(&self, i: i32) -> HexCoord {
+        *self + Self::get_unit_coord(i)
+    }
+
+    pub fn neighbors(&self) -> HexNeighborIterator {
+        HexNeighborIterator::new(*self)
     }
 
     /// Returns the `i`th vertex of `self`.

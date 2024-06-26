@@ -2,6 +2,7 @@ use crate::*;
 use std::collections;
 
 pub trait HexData<T> {
+    fn new() -> Self;
     fn hex_in_domain(&self, hex: HexCoord) -> bool;
     
     fn get(&self, hex: HexCoord) -> Option<&T>;
@@ -17,15 +18,14 @@ pub struct HashMapHexData<T> {
     data: collections::HashMap<HexCoord, T>,
 }
 
-impl<T> HashMapHexData<T> {
-    pub fn new() -> HashMapHexData<T> {
+
+impl<T> HexData<T> for HashMapHexData<T> {
+    fn new() -> HashMapHexData<T> {
         HashMapHexData {
             data: collections::HashMap::new(),
         }
     }
-}
 
-impl<T> HexData<T> for HashMapHexData<T> {
     fn hex_in_domain(&self, _: HexCoord) -> bool {
         true
     }

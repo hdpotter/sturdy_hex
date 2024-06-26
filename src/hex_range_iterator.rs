@@ -42,6 +42,7 @@ impl Iterator for HexRangeIterator {
     }
 }
 
+// todo: abstract out this behavior to depend on a range iterator
 
 pub struct HexHalfEdgeIterator {
     face: HexCoord,
@@ -93,6 +94,33 @@ impl Iterator for HexVertexIterator {
             None
         } else {
             Some(self.face.get_vertex(self.i))
+        }
+    }
+}
+
+pub struct HexNeighborIterator {
+    hex: HexCoord,
+    i: i32,
+}
+
+impl HexNeighborIterator {
+    pub fn new(hex: HexCoord) -> Self {
+        Self {
+            hex,
+            i: -1,
+        }
+    }
+}
+
+impl Iterator for HexNeighborIterator {
+    type Item = HexCoord;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.i += 1;
+        if self.i >= 6 {
+            None
+        } else {
+            Some(self.hex.get_neighbor(self.i))
         }
     }
 }

@@ -7,10 +7,19 @@ pub struct HexShape {
 }
 
 impl HexShape {
-    pub fn new(hexes: Vec<HexCoord>) -> HexShape {
+    pub fn new() -> HexShape {
+        Self::new_from_vec(Vec::new())
+    }
+
+    pub fn new_from_vec(hexes: Vec<HexCoord>) -> HexShape {
         HexShape {
             hexes,
         }
+    }
+
+    // todo: ensure no duplicates
+    pub fn push(&mut self, coord: HexCoord) {
+        self.hexes.push(coord);
     }
 
     pub fn contains(&self, coord: HexCoord) -> bool {
@@ -64,15 +73,6 @@ impl HexShape {
 //     }
 // }
 
-impl IntoIterator for HexShape {
-    type Item = HexCoord;
-    type IntoIter = std::vec::IntoIter<HexCoord>;
-   
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.hexes.into_iter()
-    }
-}
 
 impl<'a> IntoIterator for &'a HexShape {
     type Item = &'a HexCoord;
@@ -82,10 +82,6 @@ impl<'a> IntoIterator for &'a HexShape {
         self.hexes.iter()
     }
 }
-
-
-
-
 
 
 // #[derive(Copy, Clone)]
@@ -141,7 +137,6 @@ impl<'a> HexShapeView<'a> {
     }
 }
 
-// no consuming iterator because we can't consume from a reference
 
 impl<'a, 'b> IntoIterator for &'b HexShapeView<'a> {
     type Item = &'b HexCoord;
@@ -153,11 +148,3 @@ impl<'a, 'b> IntoIterator for &'b HexShapeView<'a> {
     }
 }
 
-
-// impl ops::Index<usize> for HexShapeView<'_> {
-//     type Output = HexCoord;
-
-//     fn index(&self, index: usize) -> &HexCoord {
-//         &self.shape[index]
-//     }
-// }

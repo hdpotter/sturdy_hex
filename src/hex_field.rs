@@ -2,15 +2,15 @@ use crate::*;
 use cgmath::Vector3;
 use cgmath::InnerSpace;
 
-// pub enum HexOrientation {
-//     FlatTop,
-//     PointyTop,
-// }
+pub enum HexOrientation {
+    FlatTop,
+    PointyTop,
+}
 
-// pub enum Handedness {
-//     LeftHanded,
-//     RightHanded,
-// }
+pub enum Handedness {
+    LeftHanded,
+    RightHanded,
+}
 
 /// A mapping between worldspace and hex coordinates. 
 /// Contains methods to determine which hex contains a worldspace point and calculate the worldspace positions of hex cells and vertices.
@@ -68,7 +68,7 @@ impl HexField {
 
         // orthonormalize z against y and calculate x
         let z_basis = (z_relative - InnerSpace::dot(z_relative, y_basis) * z_relative).normalize();
-        let x_basis = Vector3::cross(z_basis, y_basis);
+        let x_basis = Vector3::cross(y_basis, z_basis);
 
         // calculate q, r, and s (degenerate) basis
         let q_basis = x_basis;
@@ -169,9 +169,23 @@ impl HexField {
     }
 
     /// Returns the worldspace coordinates of the `i`th vertex of the hex at the given coordinates, translated to be at `height` above the plane of the hex grid.
-    pub fn get_hex_vertex_position(&self, hex: HexCoord, scale: f32, height: f32, i: i32) -> Vector3<f32> {
-        let center = self.get_position_with_height(hex, height);
-        let outer = self.get_position_with_height(hex.get_vertex(i), height);
+    pub fn get_face_vertex_position(&self, face: HexCoord, scale: f32, height: f32, i: i32) -> Vector3<f32> {
+        let center = self.get_position_with_height(face, height);
+        let outer = self.get_position_with_height(face.get_vertex(i), height);
+        center + scale * (outer - center)
+    }
+
+    pub fn get_source_vertex_position(&self, edge: HexHalfEdge, scale: f32, height: f32) -> Vector3<f32> {
+        let center = self.get_position_with_height(edge.hex(), height);
+        let outer = self.get_position_with_height(edge.source(), height);
+
+        center + scale * (outer - center)
+    }
+
+    pub fn get_destination_vertex_position(&self, edge: HexHalfEdge, scale: f32, height: f32) -> Vector3<f32> {
+        let center = self.get_position_with_height(edge.hex(), height);
+        let outer = self.get_position_with_height(edge.destination(), height);
+
         center + scale * (outer - center)
     }
 
